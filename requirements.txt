@@ -1,0 +1,17 @@
+requests>=2.22.0
+PyJWT==1.6.4
+Django==3.2.0
+bigcommerce==0.20.1
+psycopg2-binary==2.9.3
+tenacity
+django-cors-headers
+django-storages
+celery==4.4.7
+django-crontab
+flower
+pillow
+django-multi-captcha-admin
+django-simple-captcha
+make
+docker
+docker-composer
