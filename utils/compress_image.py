@@ -13,7 +13,7 @@ def compress_image(outfile, mb=50, quality=85, k=0.9):  # 通常你只需要修�
     """
 
     o_size = os.path.getsize(outfile) // 1024  # 函数返回为字节，除1024转为kb（1kb = 1024 bit）
-    print('before_size:{} after_size:{}'.format(o_size, mb))
+    # print('before_size:{} after_size:{}'.format(o_size, mb))
     if o_size <= mb:
         return outfile
 

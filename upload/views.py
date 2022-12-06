@@ -11,28 +11,31 @@ import json
 from rest_framework.views import APIView
 from PIL import Image
 from new_demo.settings import MEDIA_ROOT
-from upload.models import carts,pictures
+from upload.models import pictures
 from utils.compress_image import compress_image
 
 
 class UploadView(APIView):
     def post(self,request):
-        if not pictures.objects.filter(carts=carts.objects.filter(CARTSID=request.data.get('CARTSID')).first()):
-            return JsonResponse({
-                "code":404,
-                "message":"cart do not exist"
-            })
-        if pictures.objects.filter(carts=carts.objects.filter(CARTSID=request.data.get('CARTSID')).first()).count()>=5:
+        if pictures.objects.filter(cartsid=request.data.get('CARTSID')).count()>=5:
             return JsonResponse({
                 "code":404,
                 "message":"more than 5 pictures were uploaded"
             })
         pic=pictures.objects.create(
-            carts=carts.objects.filter(CARTSID=request.data.get('CARTSID')).first(),
+            cartsid=request.data.get('CARTSID'),
             photo=request.FILES.get('photo'),
         )
         path=os.path.join(MEDIA_ROOT,str(pic.photo))
-        compress_image(path)
+        try:
+            compress_image(path)
+        except:
+            os.remove(path)
+            pictures.objects.filter(id=pic.id).delete()
+            return JsonResponse({
+                "code":404,
+                "message":"invalid input photo"
+            })
         return JsonResponse({
             "code":200,
             "message":"success",
