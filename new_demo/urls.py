@@ -18,9 +18,10 @@ from django.contrib import admin
 from django.urls import path
 
 from new_demo import settings
-from upload.views import UpLoadInfo
+from upload.views import UploadView, DeletePhotoView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/upload',UpLoadInfo)
+    path('api/upload-photo',UploadView.as_view()),
+    path('api/delete-photo',DeletePhotoView.as_view())
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
