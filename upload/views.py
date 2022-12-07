@@ -10,17 +10,19 @@ import json
 
 from rest_framework.views import APIView
 from PIL import Image
-from new_demo.settings import MEDIA_ROOT
+from new_demo.settings import MEDIA_ROOT, shopLimitedDict, DOMAIN_URL
 from upload.models import pictures
 from utils.compress_image import compress_image
+from utils.judgearea import judgearea
 
 
 class UploadView(APIView):
     def post(self,request):
-        if pictures.objects.filter(cartsid=request.data.get('CARTSID')).count()>=5:
+        tk=request.META.get('X-storeHash')
+        if pictures.objects.filter(cartsid=request.data.get('CARTSID')).count()>=shopLimitedDict[judgearea(tk)]:
             return JsonResponse({
                 "code":404,
-                "message":"more than 5 pictures were uploaded"
+                "message":"more than {} pictures were uploaded".format(shopLimitedDict[judgearea(tk)])
             })
         pic=pictures.objects.create(
             cartsid=request.data.get('CARTSID'),
@@ -41,6 +43,8 @@ class UploadView(APIView):
             "message":"success",
             "data":{
                 "pic-id":pic.id,
+                "pic-uri":pic.photo.url,
+                "pic-url":DOMAIN_URL+pic.photo.url
             }
         })
     def get(self,request):
@@ -48,12 +52,12 @@ class UploadView(APIView):
 
 class DeletePhotoView(APIView):
     def post(self,request):
-        if not pictures.objects.filter(id=request.data.get('pic_id')).first():
+        if not pictures.objects.filter(id=request.data.get('pic_id'),cartsid=request.data.get('CARTSID')).first():
             return JsonResponse({
                 "code":404,
                 "message":"pic not exist"
             })
-        path=str(pictures.objects.filter(id=request.data.get('pic_id')).first().photo)
+        path=str(pictures.objects.filter(id=request.data.get('pic_id'),cartsid=request.data.get("CARTSID")).first().photo)
         os.remove(os.path.join(MEDIA_ROOT,path))
         pictures.objects.filter(id=request.data.get('pic_id')).delete()
         return JsonResponse({
